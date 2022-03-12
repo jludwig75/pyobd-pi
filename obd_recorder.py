@@ -7,6 +7,7 @@ import obd_sensors
 from datetime import datetime
 import time
 import getpass
+import os
 
 
 from obd_utils import scanSerial
@@ -18,7 +19,7 @@ class OBD_Recorder():
         localtime = time.localtime(time.time())
         filename = path+"car-"+str(localtime[0])+"-"+str(localtime[1])+"-"+str(localtime[2])+"-"+str(localtime[3])+"-"+str(localtime[4])+"-"+str(localtime[5])+".log"
         self.log_file = open(filename, "w", 128)
-        self.log_file.write("Time,RPM,MPH,Throttle,Load,Fuel Status\n");
+        self.log_file.write("Time,RPM,MPH,Throttle,Load,Fuel Status,voltage,time\n");
 
         for item in log_items:
             self.add_log_item(item)
@@ -68,33 +69,49 @@ class OBD_Recorder():
                 log_string = log_string + ","+str(value)
                 results[obd_sensors.SENSORS[index].shortname] = value;
 
-            gear = self.calculate_gear(results["rpm"], results["speed"])
+            # gear = self.calculate_gear(results["rpm"], results["speed"])
             log_string = log_string #+ "," + str(gear)
             self.log_file.write(log_string+"\n")
 
             
-    def calculate_gear(self, rpm, speed):
-        if speed == "" or speed == 0:
-            return 0
-        if rpm == "" or rpm == 0:
-            return 0
+    # def calculate_gear(self, rpm, speed):
+    #     if type(rpm) is str:
+    #         return None
+    #     if type(speed) is str:
+    #         return None
+    #     rpm = int(rpm)
+    #     speed = int(speed)
+    #     if speed == "" or speed == 0:
+    #         return 0
+    #     if rpm == "" or rpm == 0:
+    #         return 0
 
-        rps = rpm/60
-        mps = (speed*1.609*1000)/3600
+    #     rps = rpm/60
+    #     mps = (speed*1.609*1000)/3600
         
-        primary_gear = 85/46 #street triple
-        final_drive  = 47/16
+    #     primary_gear = 85/46 #street triple
+    #     final_drive  = 47/16
         
-        tyre_circumference = 1.978 #meters
+    #     tyre_circumference = 1.978 #meters
 
-        current_gear_ratio = (rps*tyre_circumference)/(mps*primary_gear*final_drive)
+    #     current_gear_ratio = (rps*tyre_circumference)/(mps*primary_gear*final_drive)
         
-        #print current_gear_ratio
-        gear = min((abs(current_gear_ratio - i), i) for i in self.gear_ratios)[1] 
-        return gear
-        
+    #     #print current_gear_ratio
+    #     gear = min((abs(current_gear_ratio - i), i) for i in self.gear_ratios)[1] 
+    #     return gear
+
+SCANNER_ID_FILE = 'scanner.id'
+
+def bind_scanner_to_port():
+    if os.path.exists(SCANNER_ID_FILE):
+        with open(SCANNER_ID_FILE, 'rt') as file:
+            id = file.read().strip()
+            print "Binding device %s to serial port" % id
+            os.system("rfcomm bind 0 %s" % id)
+
+bind_scanner_to_port()
 username = getpass.getuser()  
-logitems = ["rpm", "speed", "throttle_pos", "load", "fuel_status"]
+logitems = ["rpm", "speed", "throttle_pos", "load", "fuel_status", "voltage", "engine_time"]
 o = OBD_Recorder('/home/'+username+'/pyobd-pi/log/', logitems)
 o.connect()
 
