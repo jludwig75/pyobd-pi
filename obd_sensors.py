@@ -63,6 +63,11 @@ def temp(code):
     c = code - 40 
     return 32 + (9 * c / 5) 
 
+def voltage(code):
+    a = hex_to_int(code[0:2])
+    b = hex_to_int(code[2:4])
+    return (float(a * 256) + float(b)) / 1000.0
+
 def cpass(code):
     #fixme
     return code
@@ -169,6 +174,7 @@ SENSORS = [
     Sensor("o2_sensor_position_b"  , "Loc of O2 sensor" 			, "011D" , cpass            ,""       ),
     Sensor("aux_input"             , "Aux input status"				, "011E" , cpass            ,""       ),
     Sensor("engine_time"           , "Engine Start MIN"				, "011F" , sec_to_min       ,"min"    ),
+    Sensor("voltage"               , "Control Module Voltage"	    , "0142" , voltage          ,"min"    ),
     Sensor("engine_mil_time"       , "Engine Run MIL"				, "014D" , sec_to_min       ,"min"    ),
     ]
      
