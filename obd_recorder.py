@@ -72,6 +72,7 @@ class OBD_Recorder():
             # gear = self.calculate_gear(results["rpm"], results["speed"])
             log_string = log_string #+ "," + str(gear)
             self.log_file.write(log_string+"\n")
+            time.sleep(0.05)
 
             
     # def calculate_gear(self, rpm, speed):
