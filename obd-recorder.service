@@ -1,0 +1,16 @@
+[Unit]
+Description=OBD-II Recorder
+After=bluetooth.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=3
+User=root
+WorkingDirectory=/home/pi/pyobd-pi
+ExecStart=/usr/bin/python /home/pi/pyobd-pi/obd_recorder.py
+
+[Install]
+WantedBy=multi-user.target
+
